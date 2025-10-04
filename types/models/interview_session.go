@@ -1,8 +1,8 @@
-package types
+package models
 
 import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // InterviewSession represents an interview session stored in MongoDB
@@ -18,6 +18,4 @@ type InterviewSession struct {
 	BehaviouralTopics   []string           `bson:"behavioural_topics" json:"behaviouralTopics"`
 	TechnicalDifficulty *string            `bson:"technical_difficulty,omitempty" json:"technicalDifficulty,omitempty"`
 	CreatedAt           time.Time          `bson:"created_at" json:"createdAt"`
-	UpdatedAt           time.Time          `bson:"updated_at" json:"updatedAt"`
-	IsActive            bool               `bson:"is_active" json:"isActive"`
 }
