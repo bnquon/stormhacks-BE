@@ -11,8 +11,14 @@ import (
 	"stormhacks-be/services"
 )
 
+// ServiceContainer holds all handlers
+type ServiceContainer struct {
+	InterviewHandler *handlers.InterviewHandler
+	FeedbackHandler  *handlers.FeedbackHandler
+}
+
 // initializeServices sets up all the service dependencies
-func initializeServices() (*handlers.InterviewHandler, error) {
+func initializeServices() (*ServiceContainer, error) {
 	// MongoDB connection
 	mongoClient, err := mongodb.NewMongoClient(mongodb.DefaultConfig())
 	if err != nil {
@@ -25,14 +31,20 @@ func initializeServices() (*handlers.InterviewHandler, error) {
 	// Create layers
 	interviewRepo := repositories.NewInterviewRepository(collection)
 	interviewService := services.NewInterviewService(interviewRepo)
+	
+	// Create handlers
 	interviewHandler := handlers.NewInterviewHandler(interviewService)
+	feedbackHandler := handlers.NewFeedbackHandler(interviewService)
 
-	return interviewHandler, nil
+	return &ServiceContainer{
+		InterviewHandler: interviewHandler,
+		FeedbackHandler:  feedbackHandler,
+	}, nil
 }
 
 func main() {
 	// Initialize services
-	interviewHandler, err := initializeServices()
+	services, err := initializeServices()
 	if err != nil {
 		log.Fatal("Failed to initialize services:", err)
 	}
@@ -48,7 +60,8 @@ func main() {
 
 	// Set up routes
 	http.HandleFunc("/health", healthHandler)
-	http.HandleFunc("/api/interview/session", interviewHandler.CreateInterviewSession)
+	http.HandleFunc("/api/interview/session", services.InterviewHandler.CreateInterviewSession)
+	http.HandleFunc("/api/interview/feedback", services.FeedbackHandler.GenerateFeedback)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
 		fmt.Fprintf(w, `
@@ -63,11 +76,16 @@ func main() {
     <ul>
         <li><code>GET /health</code> - Health check</li>
         <li><code>POST /api/interview/session</code> - Create interview session</li>
+        <li><code>POST /api/interview/feedback</code> - Generate interview feedback</li>
     </ul>
     <h2>Test Interview Session:</h2>
     <pre>curl -X POST http://localhost:8080/api/interview/session \\
   -H "Content-Type: application/json" \\
   -d '{"sessionId": 123, "parsedResumeText": "resume text", "jobTitle": "Software Engineer", "jobInfo": "job description"}'</pre>
+    <h2>Test Interview Feedback:</h2>
+    <pre>curl -X POST http://localhost:8080/api/interview/feedback \\
+  -H "Content-Type: application/json" \\
+  -d '{"sessionId": 123, "interviewQuestions": [{"question": "Tell me about a time you led a team", "answer": "I led a team of 5 developers..."}]}'</pre>
 </body>
 </html>
 		`)
@@ -78,6 +96,7 @@ func main() {
 	fmt.Println("🏥 Health check: http://localhost:8080/health")
 	fmt.Println("🌐 Web interface: http://localhost:8080")
 	fmt.Println("📝 Interview API: http://localhost:8080/api/interview/session")
-	
+	fmt.Println("💬 Feedback API: http://localhost:8080/api/interview/feedback")
+
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

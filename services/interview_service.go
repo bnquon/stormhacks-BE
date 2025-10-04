@@ -62,20 +62,21 @@ func (s *InterviewService) CreateInterviewSession(input requests.InterviewSessio
 	return response, nil
 }
 
-// generateQuestions generates interview questions based on the session
-func (s *InterviewService) generateQuestions(session *models.InterviewSession) []responses.Question {
-	// This is where you'd implement your AI logic to generate questions
-	// For now, returning mock questions
-	questions := []responses.Question{
-		{
-			Question: "Tell me about a time when you had to work under pressure.",
-			Hints:    []string{"Use the STAR method", "Be specific about the situation", "Highlight your actions and results"},
-		},
-		{
-			Question: "Describe a situation where you had to resolve a conflict with a team member.",
-			Hints:    []string{"Focus on communication", "Show how you found a solution", "Demonstrate leadership skills"},
-		},
+func (s *InterviewService) GenerateInterviewFeedback(input requests.InterviewFeedbackInput) (*responses.InterviewFeedbackResponse, error) {
+	existingSession, err := s.interviewRepo.GetBySessionID(input.SessionID)
+	if err != nil && err.Error() != "not found" {
+		return nil, err
 	}
-
-	return questions
+	if existingSession == nil {
+		return nil, errors.New("session not found")
+	}
+	
+	// Create Gemini service and generate feedback
+	googleGeminiService := NewGoogleGeminiService()
+	feedbackResponse, err := googleGeminiService.GenerateInterviewFeedback(existingSession, input.InterviewQuestionsWithAnswers)
+	if err != nil {
+		return nil, err
+	}
+	
+	return feedbackResponse, nil
 }

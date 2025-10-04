@@ -1,0 +1,12 @@
+package handlers
+
+import (
+	"stormhacks-be/types/requests"
+	"stormhacks-be/types/responses"
+)
+
+// InterviewServiceInterface defines the interface for interview service
+type InterviewServiceInterface interface {
+	CreateInterviewSession(input requests.InterviewSessionInput) (*responses.InterviewSessionResponse, error)
+	GenerateInterviewFeedback(input requests.InterviewFeedbackInput) (*responses.InterviewFeedbackResponse, error)
+}
