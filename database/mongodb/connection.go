@@ -34,9 +34,16 @@ type Config struct {
 
 // NewMongoClient creates a new MongoDB client
 func NewMongoClient(config Config) (*Client, error) {
-	// Set client options with Server API
-	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
-	clientOptions := options.Client().ApplyURI(config.URI).SetServerAPIOptions(serverAPI)
+	// Set client options
+	clientOptions := options.Client().ApplyURI(config.URI)
+	
+	// Add authentication if provided
+	if config.Username != "" && config.Password != "" {
+		clientOptions.SetAuth(options.Credential{
+			Username: config.Username,
+			Password: config.Password,
+		})
+	}
 
 	// Connect to MongoDB
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
