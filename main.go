@@ -5,118 +5,79 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
-
 	"stormhacks-be/database/mongodb"
-	"stormhacks-be/resolvers"
-	"stormhacks-be/schema"
-
-	"github.com/graphql-go/graphql"
-	"github.com/joho/godotenv"
+	"stormhacks-be/handlers"
+	"stormhacks-be/repositories"
+	"stormhacks-be/services"
 )
 
-func main() {
-	// Load environment variables
-	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found, using system environment variables")
-	}
-
-	// Initialize database connection
-	if err := mongodb.InitDatabase(); err != nil {
-		log.Printf("Warning: Failed to connect to MongoDB: %v", err)
-		log.Println("Continuing without database connection...")
-	}
-	defer mongodb.CloseDatabase()
-
-	// Initialize resolvers
-	interviewResolvers := resolvers.NewInterviewResolvers()
-
-	// Get the GraphQL schema
-	graphqlSchema, err := schema.CreateSchema(interviewResolvers)
+// initializeServices sets up all the service dependencies
+func initializeServices() (*handlers.InterviewHandler, error) {
+	// MongoDB connection
+	mongoClient, err := mongodb.NewMongoClient(mongodb.DefaultConfig())
 	if err != nil {
-		log.Fatalf("Failed to create schema: %v", err)
+		return nil, fmt.Errorf("failed to connect to MongoDB: %w", err)
 	}
 
-	// GraphQL handler function
-	graphqlHandler := func(w http.ResponseWriter, r *http.Request) {
-		// Set CORS headers
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	// Get collection
+	collection := mongoClient.GetCollection("interview_sessions")
 
-		// Handle preflight requests
-		if r.Method == "OPTIONS" {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
+	// Create layers
+	interviewRepo := repositories.NewInterviewRepository(collection)
+	interviewService := services.NewInterviewService(interviewRepo)
+	interviewHandler := handlers.NewInterviewHandler(interviewService)
 
-		// Only allow POST requests for GraphQL
-		if r.Method != "POST" {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
+	return interviewHandler, nil
+}
 
-		// Parse the request body
-		var requestBody struct {
-			Query string `json:"query"`
-		}
+func main() {
+	// Initialize services
+	interviewHandler, err := initializeServices()
+	if err != nil {
+		log.Fatal("Failed to initialize services:", err)
+	}
 
-		if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
-			http.Error(w, "Invalid JSON", http.StatusBadRequest)
-			return
-		}
-
-		// Execute the GraphQL query
-		result := graphql.Do(graphql.Params{
-			Schema:        *graphqlSchema,
-			RequestString: requestBody.Query,
-		})
-
-		// Set content type and return the result
+	// Simple health check handler
+	healthHandler := func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(result)
+		json.NewEncoder(w).Encode(map[string]string{
+			"status":  "ok",
+			"message": "Interview API is running",
+		})
 	}
 
 	// Set up routes
-	http.HandleFunc("/graphql", graphqlHandler)
+	http.HandleFunc("/health", healthHandler)
+	http.HandleFunc("/api/interview/session", interviewHandler.CreateInterviewSession)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
 		fmt.Fprintf(w, `
 <!DOCTYPE html>
 <html>
 <head>
-    <title>GraphQL Server</title>
+    <title>Interview API</title>
 </head>
 <body>
-    <h1>GraphQL Server Running!</h1>
-    <p>Send POST requests to <code>/graphql</code> endpoint</p>
-    <h2>Example Query:</h2>
-    <pre>{
-  "query": "{ getInterviewSession(sessionId: 1) { sessionId jobTitle companyName } }"
-}</pre>
-    <h2>Example Mutation:</h2>
-    <pre>{
-  "query": "mutation { createInterviewSession(input: { sessionId: 1, parsedResumeText: \"Sample resume\", jobTitle: \"Software Engineer\", jobInfo: \"Full stack development\" }) { sessionId jobTitle } }"
-}</pre>
-    <h2>Test with curl:</h2>
-    <pre>curl -X POST http://localhost:8080/graphql \\
+    <h1>Interview API Server Running!</h1>
+    <p>API endpoints available:</p>
+    <ul>
+        <li><code>GET /health</code> - Health check</li>
+        <li><code>POST /api/interview/session</code> - Create interview session</li>
+    </ul>
+    <h2>Test Interview Session:</h2>
+    <pre>curl -X POST http://localhost:8080/api/interview/session \\
   -H "Content-Type: application/json" \\
-  -d '{"query": "{ getInterviewSession(sessionId: 1) { sessionId jobTitle } }"}'</pre>
+  -d '{"sessionId": 123, "parsedResumeText": "resume text", "jobTitle": "Software Engineer", "jobInfo": "job description"}'</pre>
 </body>
 </html>
 		`)
 	})
 
-	// Get port from environment variable
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
 	// Start the server
-	fmt.Printf("🚀 GraphQL server starting on http://localhost:%s\n", port)
-	fmt.Printf("📊 GraphQL endpoint: http://localhost:%s/graphql\n", port)
-	fmt.Printf("🌐 Web interface: http://localhost:%s\n", port)
-
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	fmt.Println("🚀 Interview API server starting on http://localhost:8080")
+	fmt.Println("🏥 Health check: http://localhost:8080/health")
+	fmt.Println("🌐 Web interface: http://localhost:8080")
+	fmt.Println("📝 Interview API: http://localhost:8080/api/interview/session")
+	
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
