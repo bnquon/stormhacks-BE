@@ -103,6 +103,13 @@ SCORING SCALE:
 - 8-9: Excellent (strong examples, good STAR structure)
 - 10: Outstanding (exceptional examples, perfect STAR method)
 
+GENERATE A HIREABILITY SCORE BETWEEN 0 AND 100 BASED ON THE OVERALL INTERVIEW RESPONSES NOT FOR EACH QUESTION.
+- 0-20: Not likely to be a good fit
+- 21-40: Likely to be a good fit
+- 41-60: Very likely to be a good fit
+- 61-80: Extremely likely to be a good fit
+- 81-100: Perfect fit
+
 RESPONSE FORMAT:
 Return ONLY a valid JSON object in this exact format (no markdown, no code blocks, no backticks):
 {
@@ -111,19 +118,24 @@ Return ONLY a valid JSON object in this exact format (no markdown, no code block
     {
       "question": "exact question text",
       "score": 8,
-			"strengths": [
-				"Specific strength 1 - what they did well",
-				"Specific strength 2 - what they did well", 
-				"Specific strength 3 - what they did well"
-			],
-			"areasForImprovement": [
-				"Specific area 1 - what they could improve",
-				"Specific area 2 - what they could improve",
-				"Specific area 3 - what they could improve"
-			]
+      "strengths": [
+        "Specific strength 1 - what they did well",
+        "Specific strength 2 - what they did well", 
+        "Specific strength 3 - what they did well"
+      ],
+      "areasForImprovement": [
+        "Specific area 1 - what they could improve",
+        "Specific area 2 - what they could improve",
+        "Specific area 3 - what they could improve"
+      ]
     }
-  ]
+  ],
+  "hireAbilityScore": 80
 }
+
+CRITICAL: The hireAbilityScore field should ONLY appear once at the top level of the response. 
+DO NOT include hireAbilityScore inside any individual question objects.
+Each question object should ONLY have: question, score, strengths, areasForImprovement.
 
 IMPORTANT:
 - Provide specific, actionable feedback
@@ -132,8 +144,18 @@ IMPORTANT:
 - Be constructive and professional
 - For each question, provide exactly 3 strengths and 3 areas for improvement
 - Make strengths and improvements specific to the answer given
+- Generate ONE overall hireability score (0-100) for the entire interview, not per question
+- The hireability score should be at the top level of the response, not inside each question
 - Return ONLY the JSON object, no markdown formatting, no code blocks, no backticks
 - Do not wrap the JSON in json or any other formatting
+
+FINAL REMINDER: Each question object should contain ONLY these 4 fields:
+- question
+- score  
+- strengths
+- areasForImprovement
+
+DO NOT include hireAbilityScore in any question object. It should only appear once at the top level.
 `, 
 		session.JobTitle,
 		session.CompanyName,
