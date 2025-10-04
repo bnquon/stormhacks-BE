@@ -1,4 +1,4 @@
-package types
+package responses
 
 // Question represents a single interview question
 type Question struct {
@@ -10,11 +10,4 @@ type Question struct {
 type InterviewSessionResponse struct {
 	SessionID int        `json:"sessionId"`
 	Questions []Question `json:"questions"`
-}
-
-// ErrorResponse represents an error response
-type ErrorResponse struct {
-	Message string `json:"message"`
-	Code    string `json:"code"`
-	Details string `json:"details,omitempty"`
 }
