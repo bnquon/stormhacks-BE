@@ -7,6 +7,7 @@ A simple Go backend with GraphQL that provides a "hello world" endpoint with moc
 You'll need to install Go first:
 
 ### Install Go on macOS:
+
 ```bash
 # Using Homebrew (recommended)
 brew install go
@@ -15,6 +16,7 @@ brew install go
 ```
 
 ### Verify Installation:
+
 ```bash
 go version
 ```
@@ -22,22 +24,35 @@ go version
 ## Setup and Run
 
 1. **Install dependencies:**
-   ```bash
-   go mod tidy
-   ```
 
-2. **Run the server:**
-   ```bash
-   go run main.go
-   ```
+    ```bash
+    go mod tidy
+    ```
 
-3. **Access the server:**
-   - Web interface: http://localhost:8080
-   - GraphQL endpoint: http://localhost:8080/graphql
+2. **Set up environment variables:**
+
+    ```bash
+    # Copy the example environment file
+    cp .env.example .env
+
+    # Edit .env with your MongoDB credentials
+    # The .env file contains your MongoDB Atlas connection string
+    ```
+
+3. **Run the server:**
+
+    ```bash
+    go run main.go
+    ```
+
+4. **Access the server:**
+    - Web interface: http://localhost:8080
+    - GraphQL endpoint: http://localhost:8080/graphql
 
 ## Testing the GraphQL Endpoint
 
 ### Using curl:
+
 ```bash
 curl -X POST http://localhost:8080/graphql \
   -H "Content-Type: application/json" \
@@ -45,15 +60,16 @@ curl -X POST http://localhost:8080/graphql \
 ```
 
 ### Expected Response:
+
 ```json
 {
-  "data": {
-    "hello": {
-      "message": "Hello from GraphQL!",
-      "status": "success",
-      "count": 42
+    "data": {
+        "hello": {
+            "message": "Hello from GraphQL!",
+            "status": "success",
+            "count": 42
+        }
     }
-  }
 }
 ```
 
@@ -68,9 +84,9 @@ stormhacks-BE/
 
 ## Features
 
-- ✅ Simple GraphQL schema with hello world endpoint
-- ✅ Mock data (no database required)
-- ✅ CORS enabled for web requests
-- ✅ Web interface for testing
-- ✅ Clean Go module structure
-- ✅ Runs on port 8080# stormhacks-BE
+-   ✅ Simple GraphQL schema with hello world endpoint
+-   ✅ Mock data (no database required)
+-   ✅ CORS enabled for web requests
+-   ✅ Web interface for testing
+-   ✅ Clean Go module structure
+-   ✅ Runs on port 8080# stormhacks-BE

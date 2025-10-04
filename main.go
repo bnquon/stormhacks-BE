@@ -5,62 +5,34 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+
+	"stormhacks-be/database/mongodb"
+	"stormhacks-be/resolvers"
+	"stormhacks-be/schema"
 
 	"github.com/graphql-go/graphql"
+	"github.com/joho/godotenv"
 )
 
-// HelloResponse represents our mock data structure
-type HelloResponse struct {
-	Message string `json:"message"`
-	Status  string `json:"status"`
-	Count   int    `json:"count"`
-}
-
-// Mock data
-var mockData = HelloResponse{
-	Message: "Hello from GraphQL!",
-	Status:  "success",
-	Count:   42,
-}
-
-// Root query resolver
-func rootQueryResolver(p graphql.ResolveParams) (interface{}, error) {
-	return mockData, nil
-}
-
 func main() {
-	// Define the GraphQL schema
-	helloType := graphql.NewObject(graphql.ObjectConfig{
-		Name: "Hello",
-		Fields: graphql.Fields{
-			"message": &graphql.Field{
-				Type: graphql.String,
-			},
-			"status": &graphql.Field{
-				Type: graphql.String,
-			},
-			"count": &graphql.Field{
-				Type: graphql.Int,
-			},
-		},
-	})
+	// Load environment variables
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found, using system environment variables")
+	}
 
-	// Define the root query
-	rootQuery := graphql.NewObject(graphql.ObjectConfig{
-		Name: "RootQuery",
-		Fields: graphql.Fields{
-			"hello": &graphql.Field{
-				Type:        helloType,
-				Description: "Get a hello world message",
-				Resolve:     rootQueryResolver,
-			},
-		},
-	})
+	// Initialize database connection
+	if err := mongodb.InitDatabase(); err != nil {
+		log.Printf("Warning: Failed to connect to MongoDB: %v", err)
+		log.Println("Continuing without database connection...")
+	}
+	defer mongodb.CloseDatabase()
 
-	// Create the schema
-	schema, err := graphql.NewSchema(graphql.SchemaConfig{
-		Query: rootQuery,
-	})
+	// Initialize resolvers
+	interviewResolvers := resolvers.NewInterviewResolvers()
+
+	// Get the GraphQL schema
+	graphqlSchema, err := schema.CreateSchema(interviewResolvers)
 	if err != nil {
 		log.Fatalf("Failed to create schema: %v", err)
 	}
@@ -96,7 +68,7 @@ func main() {
 
 		// Execute the GraphQL query
 		result := graphql.Do(graphql.Params{
-			Schema:        schema,
+			Schema:        *graphqlSchema,
 			RequestString: requestBody.Query,
 		})
 
@@ -120,21 +92,31 @@ func main() {
     <p>Send POST requests to <code>/graphql</code> endpoint</p>
     <h2>Example Query:</h2>
     <pre>{
-  "query": "{ hello { message status } }"
+  "query": "{ getInterviewSession(sessionId: 1) { sessionId jobTitle companyName } }"
+}</pre>
+    <h2>Example Mutation:</h2>
+    <pre>{
+  "query": "mutation { createInterviewSession(input: { sessionId: 1, parsedResumeText: \"Sample resume\", jobTitle: \"Software Engineer\", jobInfo: \"Full stack development\" }) { sessionId jobTitle } }"
 }</pre>
     <h2>Test with curl:</h2>
     <pre>curl -X POST http://localhost:8080/graphql \\
   -H "Content-Type: application/json" \\
-  -d '{"query": "{ hello { message status } }"}'</pre>
+  -d '{"query": "{ getInterviewSession(sessionId: 1) { sessionId jobTitle } }"}'</pre>
 </body>
 </html>
 		`)
 	})
 
-	// Start the server
-	fmt.Println("🚀 GraphQL server starting on http://localhost:8080")
-	fmt.Println("📊 GraphQL endpoint: http://localhost:8080/graphql")
-	fmt.Println("🌐 Web interface: http://localhost:8080")
+	// Get port from environment variable
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	// Start the server
+	fmt.Printf("🚀 GraphQL server starting on http://localhost:%s\n", port)
+	fmt.Printf("📊 GraphQL endpoint: http://localhost:%s/graphql\n", port)
+	fmt.Printf("🌐 Web interface: http://localhost:%s\n", port)
+
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
