@@ -5,16 +5,16 @@ import (
 	"errors"
 	"net/http"
 	"stormhacks-be/types/requests"
-	"stormhacks-be/services"
 )
+
 
 // InterviewHandler handles interview-related HTTP requests
 type InterviewHandler struct {
-	interviewService *services.InterviewService
+	interviewService InterviewServiceInterface
 }
 
 // NewInterviewHandler creates a new interview handler
-func NewInterviewHandler(interviewService *services.InterviewService) *InterviewHandler {
+func NewInterviewHandler(interviewService InterviewServiceInterface) *InterviewHandler {
 	return &InterviewHandler{
 		interviewService: interviewService,
 	}
