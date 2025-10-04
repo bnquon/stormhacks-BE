@@ -20,6 +20,10 @@ func NewInterviewService(interviewRepo *repositories.InterviewRepository) *Inter
 	}
 }
 
+func (s *InterviewService) GetInterviewSession(sessionID int) (*models.InterviewSession, error) {
+	return s.interviewRepo.GetBySessionID(sessionID)
+}
+
 // CreateInterviewSession creates a new interview session
 func (s *InterviewService) CreateInterviewSession(input requests.InterviewSessionInput) (*responses.InterviewSessionResponse, error) {
 	// Check if session already exists
@@ -50,13 +54,9 @@ func (s *InterviewService) CreateInterviewSession(input requests.InterviewSessio
 		return nil, err
 	}
 
-	// Generate questions (this would be your AI logic)
-	questions := s.generateQuestions(createdSession)
-
 	// Return response
 	response := &responses.InterviewSessionResponse{
 		SessionID: createdSession.SessionID,
-		Questions: questions,
 	}
 
 	return response, nil
