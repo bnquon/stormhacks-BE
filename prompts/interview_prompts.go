@@ -185,6 +185,8 @@ IMPORTANT: Adjust your evaluation based on the job title:
 - For Junior/Entry roles: Focus on basic correctness, learning potential, growth mindset
 - For Intern/Co-op roles: Emphasize learning, basic understanding, willingness to improve
 
+IMPORTANT: Maximum of 5 suggestions and 5 strengths but prefer 3 suggestions and 3 strengths if the 4th and 5th are not that important
+
 Provide feedback in this exact JSON format:
 {
   "hireAbilityScore": number (0-100),

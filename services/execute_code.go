@@ -34,8 +34,6 @@ func ExecuteCode(input requests.ExecuteTechnicalInput, interviewRepo *repositori
 	for i, testCase := range question.Question.TestCases {
 		// Prepare the code with test case input
 		executionCode := prepareCodeWithTestCase(input.Code, testCase.Input, string(input.Language), question.Question.FunctionName)
-
-		fmt.Println(executionCode);
 		
 		// Execute the code
 		startTime := time.Now()
