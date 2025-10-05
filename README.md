@@ -8,7 +8,7 @@ A comprehensive interview system with Google Gemini AI integration for question 
 - **Code Execution**: Execute and validate code submissions against test cases
 - **Intelligent Hints**: AI-generated hints for technical problems
 - **Technical Feedback**: Job-context aware feedback with hireability scoring
-- **Multi-Language Support**: Python, JavaScript, Java
+- **Multi-Language Support**: Python, JavaScript
 - **MongoDB Integration**: Persistent session and question storage
 
 ## Prerequisites
