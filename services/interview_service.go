@@ -270,12 +270,17 @@ func (s *InterviewService) GenerateTechnicalFeedback(input requests.TechnicalFee
 	googleGeminiService := NewGoogleGeminiService()
 	
 	// Prepare question info for the prompt including job context
+	companyName := ""
+	if session.CompanyName != nil {
+		companyName = *session.CompanyName
+	}
+	
 	questionInfo := map[string]string{
 		"question":    question.Question.Question,
 		"description": question.Question.Description,
 		"difficulty":   string(question.Difficulty),
 		"jobTitle":    session.JobTitle,
-		"companyName": *session.CompanyName,
+		"companyName": companyName,
 	}
 
 	// Generate feedback using Gemini
