@@ -265,8 +265,8 @@ func (h *InterviewHandler) validateHintRequest(input requests.HintRequest) error
 	if input.SessionID == "" {
 		return errors.New("sessionId is required")
 	}
-	if input.Question == "" {
-		return errors.New("question is required")
+	if input.QuestionID == "" {
+		return errors.New("questionId is required")
 	}
 	if input.UserCode == "" {
 		return errors.New("userCode is required")

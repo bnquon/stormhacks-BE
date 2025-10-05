@@ -218,15 +218,30 @@ func (s *InterviewService) ExecuteCode(input requests.ExecuteTechnicalInput) (*r
 
 // GenerateHint generates hints for a user's response to an interview question
 func (s *InterviewService) GenerateHint(input requests.HintRequest) (*responses.HintResponse, error) {
-	// For now, just validate session exists but don't use session info
+	// Validate session exists
 	_, err := s.interviewRepo.GetBySessionID(input.SessionID)
 	if err != nil {
 		return nil, err
 	}
 
-	// Create Gemini service and generate hints
+	// Get the technical question by ID
+	question, err := s.interviewRepo.GetTechnicalQuestionByID(input.QuestionID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create Gemini service and generate hints with full question context
 	googleGeminiService := NewGoogleGeminiService()
-	hintResponse, err := googleGeminiService.GenerateHint(input.Question, input.UserCode, input.UserSpeech, input.PreviousHints)
+	
+	// Combine question and description for better context
+	fullQuestion := question.Question.Question + "\n\nDescription: " + question.Question.Description
+
+	hintResponse, err := googleGeminiService.GenerateHint(
+		fullQuestion, 
+		input.UserCode, 
+		input.UserSpeech, 
+		input.PreviousHints,
+	)
 	if err != nil {
 		return nil, err
 	}

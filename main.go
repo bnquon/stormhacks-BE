@@ -270,7 +270,7 @@ func main() {
   "id": "507f1f77bcf86cd799439011",
   "difficulty": "Medium",
   "question": {
-    "question": "Implement a function to find the longest common subsequence between two strings",
+    "questionId": "68e205dadb8a0fc4ec6924e9",
     "description": "Given two strings, find the length of the longest common subsequence. A subsequence is a sequence that appears in the same relative order, but not necessarily contiguous.",
     "functionName": "longestCommonSubsequence",
     "testCases": [
@@ -299,7 +299,7 @@ func main() {
             <div class="payload">
                 <pre>{
   "sessionId": "550e8400-e29b-41d4-a716-446655440000",
-  "question": "Implement a function to find the longest common subsequence between two strings",
+  "questionId": "68e205dadb8a0fc4ec6924e9",
   "previousHints": ["Think about dynamic programming", "Consider the recursive relationship"],
   "userCode": "function lcs(str1, str2) {\n  // My current attempt\n  return '';\n}",
   "userSpeech": "I'm trying to implement this function but I'm not sure where to start. Can you help me?"
@@ -326,7 +326,7 @@ func main() {
             <div class="payload">
                 <pre>{
   "sessionId": "550e8400-e29b-41d4-a716-446655440000",
-  "question": "Implement a function to find the longest common subsequence between two strings",
+  "questionId": "68e205dadb8a0fc4ec6924e9",
   "previousHints": ["Think about dynamic programming", "Consider the recursive relationship"],
   "userCode": "function lcs(str1, str2) {\n  // My current attempt\n  return '';\n}",
   "userSpeech": "I'm trying to implement this function but I'm not sure where to start. Can you help me?"
