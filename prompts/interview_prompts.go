@@ -81,20 +81,21 @@ Please evaluate each response and provide:
 - Score (1-10 scale)
 - 3 specific strengths
 - 3 areas for improvement
-- Overall hireability assessment
+- Overall hireability score (0-100)
+- 3 points of overall feedback
 
 Return your evaluation in this exact JSON format:
 {
   "interviewQuestionFeedback": [
     {
-      "question": "The interview question",
-      "score": 8,
+      "question": "The exact interview question",
+      "score": number (1-10),
       "strengths": ["strength 1", "strength 2", "strength 3"],
       "areasForImprovement": ["improvement 1", "improvement 2", "improvement 3"],
-      "hireAbilityScore": 85
     }
   ],
-  "hireAbilityScore": 82
+  "hireAbilityScore": number (0-100),
+  "overallFeedback": ["feedback 1", "feedback 2", "feedback 3"]
 }
 
 Return ONLY the JSON, no other text.`

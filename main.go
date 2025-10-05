@@ -226,8 +226,7 @@ func main() {
         "Could elaborate on the specific technical challenges faced",
         "Could provide more detail about the team's individual contributions",
         "Could discuss lessons learned from the experience"
-      ],
-      "hireAbilityScore": 85
+      ]
     },
     {
       "question": "Describe a time you solved a complex technical problem",
@@ -240,11 +239,15 @@ func main() {
       "areasForImprovement": [
         "Could explain the broader impact on the application",
         "Could discuss preventive measures implemented"
-      ],
-      "hireAbilityScore": 90
+      ]
     }
   ],
-  "hireAbilityScore": 87
+  "hireAbilityScore": 87,
+  "overallFeedback": [
+    "Strong technical leadership with clear communication and measurable results",
+    "Excellent problem-solving approach using appropriate tools and methodologies",
+    "Consider expanding on broader impact and preventive measures for even stronger responses"
+  ]
 }</pre>
             </div>
         </div>
