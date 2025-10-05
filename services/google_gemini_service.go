@@ -5,10 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"strings"
-	"stormhacks-be/types/models"
+	"stormhacks-be/models"
+	"stormhacks-be/prompts"
+	"stormhacks-be/types/enums"
 	"stormhacks-be/types/requests"
 	"stormhacks-be/types/responses"
+	"strings"
+
 	"google.golang.org/genai"
 )
 
@@ -30,12 +33,75 @@ func NewGoogleGeminiService() *GoogleGeminiService {
 	}
 }
 
+// CustomizeInterviewQuestions tailors questions based on job description and resume
+func (s *GoogleGeminiService) CustomizeInterviewQuestions(session *models.InterviewSession, questions []models.QuestionBank) ([]CustomizedQuestion, error) {
+	ctx := context.Background()
+	
+	// Build session info map
+	sessionInfo := map[string]string{
+		"jobTitle":       session.JobTitle,
+		"jobInfo":        session.JobInfo,
+		"companyName":    getStringValue(session.CompanyName),
+		"additionalInfo": getStringValue(session.AdditionalInfo),
+		"resumeText":     session.ParsedResumeText,
+	}
+	
+	// Build questions text
+	var questionsText strings.Builder
+	for i, q := range questions {
+		questionsText.WriteString(fmt.Sprintf("%d. [%s] %s\n", i+1, q.BehavioralTopic, q.Question))
+	}
+	
+	// Use prompts file
+	prompt := prompts.QuestionCustomizationPrompt(sessionInfo, questionsText.String())
+	
+	// Call Gemini API
+	result, err := s.client.Models.GenerateContent(
+		ctx,
+		"gemini-2.0-flash-exp",
+		genai.Text(prompt),
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate customized questions: %v", err)
+	}
+	
+	// Parse the response
+	responseText := result.Text()
+	if responseText == "" {
+		return nil, fmt.Errorf("no response from Gemini")
+	}
+	
+	// Parse the JSON response
+	customizedQuestions, err := s.parseCustomizedQuestionsResponse(responseText, questions)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse customized questions: %v", err)
+	}
+	
+	return customizedQuestions, nil
+}
+
 // GenerateInterviewFeedback evaluates interview responses using Gemini
 func (s *GoogleGeminiService) GenerateInterviewFeedback(session *models.InterviewSession, interviewQuestionsWithAnswers []requests.QuestionWithAnswer) (*responses.InterviewFeedbackResponse, error) {
 	ctx := context.Background()
 	
-	// Build the system prompt
-	prompt := s.buildEvaluationPrompt(session, interviewQuestionsWithAnswers)
+	// Build session info map
+	sessionInfo := map[string]string{
+		"jobTitle":       session.JobTitle,
+		"jobInfo":        session.JobInfo,
+		"companyName":    getStringValue(session.CompanyName),
+		"additionalInfo": getStringValue(session.AdditionalInfo),
+		"resumeText":     session.ParsedResumeText,
+	}
+	
+	// Build questions with answers text
+	var questionsWithAnswersText strings.Builder
+	for i, qa := range interviewQuestionsWithAnswers {
+		questionsWithAnswersText.WriteString(fmt.Sprintf("%d. Question: %s\n   Answer: %s\n\n", i+1, qa.Question, qa.Answer))
+	}
+	
+	// Use prompts file
+	prompt := prompts.FeedbackEvaluationPrompt(sessionInfo, questionsWithAnswersText.String())
 	
 	// Call Gemini API
 	result, err := s.client.Models.GenerateContent(
@@ -208,4 +274,96 @@ func (s *GoogleGeminiService) cleanJsonResponse(responseText string) string {
 	}
 	
 	return cleaned
+}
+
+// buildQuestionCustomizationPrompt creates a prompt for customizing interview questions
+func (s *GoogleGeminiService) buildQuestionCustomizationPrompt(session *models.InterviewSession, questions []models.QuestionBank) string {
+	var questionsText strings.Builder
+	for i, q := range questions {
+		questionsText.WriteString(fmt.Sprintf("%d. [%s] %s\n", i+1, q.BehavioralTopic, q.Question))
+	}
+
+	prompt := fmt.Sprintf(`You are an expert interview coach. I need you to customize these behavioral interview questions to be more specific to the candidate's background and the job they're applying for.
+
+JOB INFORMATION:
+- Job Title: %s
+- Job Description: %s
+- Company: %s
+- Additional Info: %s
+
+CANDIDATE BACKGROUND:
+- Resume Text: %s
+
+ORIGINAL QUESTIONS TO CUSTOMIZE:
+%s
+
+INSTRUCTIONS:
+1. Keep the same behavioral topic for each question
+2. Make the questions more specific to the job role and company
+3. Reference relevant technologies, skills, or experiences from the resume when appropriate
+4. Maintain the behavioral interview format (STAR method applicable)
+5. Keep questions professional and challenging but fair
+
+Please return the customized questions in this exact JSON format:
+{
+  "questions": [
+    {
+      "behavioralTopic": "Leadership",
+      "question": "Customized question text here"
+    }
+  ]
+}
+
+Return ONLY the JSON, no other text.`, 
+		session.JobTitle,
+		session.JobInfo,
+		getStringValue(session.CompanyName),
+		getStringValue(session.AdditionalInfo),
+		session.ParsedResumeText,
+		questionsText.String())
+
+	return prompt
+}
+
+// parseCustomizedQuestionsResponse parses the customized questions JSON response
+func (s *GoogleGeminiService) parseCustomizedQuestionsResponse(responseText string, originalQuestions []models.QuestionBank) ([]CustomizedQuestion, error) {
+	// Clean the response text
+	cleanedText := s.cleanJsonResponse(responseText)
+	
+	// Parse JSON response
+	var response struct {
+		Questions []struct {
+			BehavioralTopic string   `json:"behavioralTopic"`
+			Question        string   `json:"question"`
+			Hints           []string `json:"hints"`
+		} `json:"questions"`
+	}
+	
+	err := json.Unmarshal([]byte(cleanedText), &response)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal customized questions JSON: %w. Response: %s", err, cleanedText)
+	}
+	
+	// Convert to CustomizedQuestion models, preserving original IDs
+	var customizedQuestions []CustomizedQuestion
+	for i, q := range response.Questions {
+		if i < len(originalQuestions) {
+			customizedQuestions = append(customizedQuestions, CustomizedQuestion{
+				ID:              originalQuestions[i].ID.Hex(), // Convert ObjectID to string
+				Question:        q.Question,
+				BehavioralTopic: enums.BehaviouralTopic(q.BehavioralTopic),
+				Hints:           q.Hints,
+			})
+		}
+	}
+	
+	return customizedQuestions, nil
+}
+
+// getStringValue safely gets string value from pointer
+func getStringValue(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
 }

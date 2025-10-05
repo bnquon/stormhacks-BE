@@ -5,8 +5,8 @@ import (
 	"errors"
 	"net/http"
 	"stormhacks-be/types/requests"
+	"strconv"
 )
-
 
 // InterviewHandler handles interview-related HTTP requests
 type InterviewHandler struct {
@@ -62,6 +62,52 @@ func (h *InterviewHandler) CreateInterviewSession(w http.ResponseWriter, r *http
 
 	// Return success response
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(response)
+}
+
+// GetInterviewQuestions handles GET /api/interview-questions
+func (h *InterviewHandler) GetInterviewQuestions(w http.ResponseWriter, r *http.Request) {
+	// Set CORS headers
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Content-Type", "application/json")
+
+	// Handle preflight requests
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	// Only allow GET requests
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Get sessionId from query parameters
+	sessionIdStr := r.URL.Query().Get("sessionId")
+	if sessionIdStr == "" {
+		http.Error(w, "sessionId query parameter is required", http.StatusBadRequest)
+		return
+	}
+
+	// Convert sessionId to int
+	sessionId, err := strconv.Atoi(sessionIdStr)
+	if err != nil {
+		http.Error(w, "sessionId must be a valid integer", http.StatusBadRequest)
+		return
+	}
+
+	// Get interview questions
+	response, err := h.interviewService.GenerateInterviewQuestions(sessionId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Return success response
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
 }
 

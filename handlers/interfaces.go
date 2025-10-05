@@ -8,5 +8,6 @@ import (
 // InterviewServiceInterface defines the interface for interview service
 type InterviewServiceInterface interface {
 	CreateInterviewSession(input requests.InterviewSessionInput) (*responses.InterviewSessionResponse, error)
+	GenerateInterviewQuestions(sessionID int) (*responses.InterviewSessionQuestionsResponse, error)
 	GenerateInterviewFeedback(input requests.InterviewFeedbackInput) (*responses.InterviewFeedbackResponse, error)
 }
