@@ -159,3 +159,59 @@ func (h *InterviewHandler) GetTechnicalQuestion(w http.ResponseWriter, r *http.R
 	json.NewEncoder(w).Encode(question)
 }
 
+// ExecuteCode handles POST /api/execute-code
+func (h *InterviewHandler) ExecuteCode(w http.ResponseWriter, r *http.Request) {
+	// Set CORS headers
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Content-Type", "application/json")
+
+	// Handle preflight requests
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	// Only allow POST requests
+	if r.Method != "POST" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse request body
+	var input requests.ExecuteTechnicalInput
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	// Validate input
+	if err := h.validateExecuteTechnicalInput(input); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Execute code
+	response, err := h.interviewService.ExecuteCode(input)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Return success response
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
+}
+
+// validateExecuteTechnicalInput validates the input data
+func (h *InterviewHandler) validateExecuteTechnicalInput(input requests.ExecuteTechnicalInput) error {
+	if input.QuestionID == "" {
+		return errors.New("questionId is required")
+	}
+	if input.Code == "" {
+		return errors.New("code is required")
+	}
+	return nil
+}
+

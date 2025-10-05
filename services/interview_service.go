@@ -210,3 +210,8 @@ func (s *InterviewService) GetTechnicalQuestion(difficulty string) (*models.Tech
 
 	return question, nil
 }
+
+// ExecuteCode executes submitted code and validates against test cases
+func (s *InterviewService) ExecuteCode(input requests.ExecuteTechnicalInput) (*responses.ExecuteTechnicalResponse, error) {
+	return ExecuteCode(input, s.interviewRepo)
+}

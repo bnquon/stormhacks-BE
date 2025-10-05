@@ -68,6 +68,7 @@ func main() {
 	http.HandleFunc("/api/interview-questions", services.InterviewHandler.GetInterviewQuestions)
 	http.HandleFunc("/api/interview/feedback", services.FeedbackHandler.GenerateFeedback)
 	http.HandleFunc("/api/technical-question", services.InterviewHandler.GetTechnicalQuestion)
+	http.HandleFunc("/api/execute-code", services.InterviewHandler.ExecuteCode)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
 		fmt.Fprintf(w, `
@@ -270,6 +271,7 @@ func main() {
   "question": {
     "question": "Implement a function to find the longest common subsequence between two strings",
     "description": "Given two strings, find the length of the longest common subsequence. A subsequence is a sequence that appears in the same relative order, but not necessarily contiguous.",
+    "functionName": "longestCommonSubsequence",
     "testCases": [
       {
         "input": "ABCDGH, AEDFHR",
@@ -283,6 +285,71 @@ func main() {
   }
 }</pre>
             </div>
+        </div>
+
+        <div class="endpoint">
+            <h2><span class="method post">POST</span><span class="url">/api/execute-code</span></h2>
+            <p><strong>Description:</strong> Execute user-submitted code against test cases for technical questions</p>
+            <p><strong>Request:</strong></p>
+            <pre>curl -X POST http://localhost:8080/api/execute-code \\
+  -H "Content-Type: application/json" \\
+  -d '{...}'</pre>
+            <p><strong>Payload:</strong></p>
+            <div class="payload">
+                <pre>{
+  "questionId": "68e205dadb8a0fc4ec6924e9",
+  "code": "def rottenOranges(grid):\n    if not grid or not grid[0]:\n        return -1\n    \n    m, n = len(grid), len(grid[0])\n    queue = []\n    fresh = 0\n    \n    # Find all rotten oranges and count fresh ones\n    for i in range(m):\n        for j in range(n):\n            if grid[i][j] == 2:\n                queue.append((i, j, 0))\n            elif grid[i][j] == 1:\n                fresh += 1\n    \n    if fresh == 0:\n        return 0\n    \n    directions = [(0,1), (1,0), (0,-1), (-1,0)]\n    \n    while queue:\n        i, j, time = queue.pop(0)\n        \n        for di, dj in directions:\n            ni, nj = i + di, j + dj\n            if 0 <= ni < m and 0 <= nj < n and grid[ni][nj] == 1:\n                grid[ni][nj] = 2\n                fresh -= 1\n                if fresh == 0:\n                    return time + 1\n                queue.append((ni, nj, time + 1))\n    \n    return -1",
+  "language": "python"
+}</pre>
+            </div>
+            <p><strong>Response (Success):</strong></p>
+            <div class="response">
+                <pre>{
+  "questionId": "68e205dadb8a0fc4ec6924e9",
+  "code": "def rottenOranges(grid):...",
+  "language": "python",
+  "output": "4\n-1\n0",
+  "error": "",
+  "executionTime": 200,
+  "success": true
+}</pre>
+            </div>
+            <p><strong>Response (Compilation Error):</strong></p>
+            <div class="response">
+                <pre>{
+  "questionId": "68e205dadb8a0fc4ec6924e9",
+  "code": "def rottenOranges(grid):...",
+  "language": "python",
+  "output": "",
+  "error": "Compilation Error: SyntaxError: expected ':'",
+  "executionTime": 50,
+  "success": false
+}</pre>
+            </div>
+            <p><strong>Response (Wrong Answer):</strong></p>
+            <div class="response">
+                <pre>{
+  "questionId": "68e205dadb8a0fc4ec6924e9",
+  "code": "def rottenOranges(grid):...",
+  "language": "python",
+  "output": "1\n1\n0",
+  "error": "Test case 1: Expected '4', got '1'\nTest case 2: Expected '-1', got '1'",
+  "executionTime": 150,
+  "success": false
+}</pre>
+            </div>
+            <p><strong>Supported Languages:</strong></p>
+            <ul>
+                <li><code>python</code> - Python 3</li>
+                <li><code>javascript</code> - JavaScript (Node.js)</li>
+            </ul>
+            <p><strong>Error Types:</strong></p>
+            <ul>
+                <li><strong>Compilation Error</strong> - Syntax errors, missing imports, etc.</li>
+                <li><strong>Runtime Error</strong> - Index out of bounds, null pointer, etc.</li>
+                <li><strong>Wrong Answer</strong> - Code runs but produces incorrect output</li>
+                <li><strong>Execution Error</strong> - Timeout, memory issues, etc.</li>
+            </ul>
         </div>
 
 
@@ -332,6 +399,7 @@ func main() {
 	fmt.Println("AI Questions: http://localhost:8080/api/interview-questions")
 	fmt.Println("AI Feedback: http://localhost:8080/api/interview/feedback")
 	fmt.Println("Technical Questions: http://localhost:8080/api/technical-question")
+	fmt.Println("Code Execution: http://localhost:8080/api/execute-code")
 	fmt.Println("Powered by Google Gemini AI for intelligent question customization!")
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
