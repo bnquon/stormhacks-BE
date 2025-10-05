@@ -416,3 +416,33 @@ func getStringValue(s *string) string {
 	}
 	return *s
 }
+
+// GenerateTechnicalFeedback generates technical feedback using Gemini
+func (s *GoogleGeminiService) GenerateTechnicalFeedback(questionInfo map[string]string, userCode string, hintsUsed int, isCompleted bool, timeTaken int) (*responses.TechnicalFeedbackResponse, error) {
+	prompt := prompts.TechnicalFeedbackPrompt(questionInfo, userCode, hintsUsed, isCompleted, timeTaken)
+	
+	ctx := context.Background()
+	result, err := s.client.Models.GenerateContent(
+		ctx,
+		"gemini-2.0-flash-exp",
+		genai.Text(prompt),
+		nil,
+	)
+	
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate technical feedback: %w", err)
+	}
+
+	// Parse the JSON response
+	content := result.Text()
+	
+	// Clean the response text - remove markdown formatting
+	cleanedText := s.cleanJsonResponse(content)
+	
+	var feedbackResponse responses.TechnicalFeedbackResponse
+	if err := json.Unmarshal([]byte(cleanedText), &feedbackResponse); err != nil {
+		return nil, fmt.Errorf("failed to parse technical feedback response: %w. Response: %s", err, cleanedText)
+	}
+
+	return &feedbackResponse, nil
+}

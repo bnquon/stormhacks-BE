@@ -151,3 +151,54 @@ Return your response in this exact JSON format:
 
 Return ONLY the JSON, no other text.`
 }
+
+// TechnicalFeedbackPrompt creates a prompt for generating technical feedback
+func TechnicalFeedbackPrompt(questionInfo map[string]string, userCode string, hintsUsed int, isCompleted bool, timeTaken int) string {
+	return `You are an expert technical interviewer evaluating a candidate's performance on a coding problem.
+
+JOB CONTEXT:
+- Job Title: ` + questionInfo["jobTitle"] + `
+- Company: ` + questionInfo["companyName"] + `
+
+PROBLEM INFORMATION:
+- Question: ` + questionInfo["question"] + `
+- Description: ` + questionInfo["description"] + `
+- Difficulty: ` + questionInfo["difficulty"] + `
+
+CANDIDATE PERFORMANCE:
+- Code Submitted: ` + userCode + `
+- Hints Used: ` + fmt.Sprintf("%d", hintsUsed) + `
+- Completed: ` + fmt.Sprintf("%t", isCompleted) + `
+- Time Taken: ` + fmt.Sprintf("%d seconds", timeTaken) + `
+
+EVALUATION CRITERIA (adjusted for job level):
+- Code correctness and efficiency
+- Problem-solving approach
+- Code quality and readability
+- Time management
+- Independence (hints used)
+- Seniority expectations based on job title
+
+IMPORTANT: Adjust your evaluation based on the job title:
+- For Senior/Lead roles: Expect advanced algorithms, clean architecture, optimal solutions
+- For Mid-level roles: Expect solid fundamentals, good problem-solving, some optimization
+- For Junior/Entry roles: Focus on basic correctness, learning potential, growth mindset
+- For Intern/Co-op roles: Emphasize learning, basic understanding, willingness to improve
+
+Provide feedback in this exact JSON format:
+{
+  "hireAbilityScore": number (0-100),
+  "suggestions": [
+    "suggestion 1",
+    "suggestion 2",
+    "suggestion 3"
+  ],
+  "strengths": [
+    "strength 1",
+    "strength 2",
+    "strength 3"
+  ]
+}
+
+Return ONLY the JSON, no other text with the removed beginning and ending quote and json markers`
+}

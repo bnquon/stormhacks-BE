@@ -14,4 +14,5 @@ type InterviewServiceInterface interface {
 	GetTechnicalQuestion(difficulty string) (*models.TechnicalBank, error)
 	ExecuteCode(input requests.ExecuteTechnicalInput) (*responses.ExecuteTechnicalResponse, error)
 	GenerateHint(input requests.HintRequest) (*responses.HintResponse, error)
+	GenerateTechnicalFeedback(input requests.TechnicalFeedbackInput) (*responses.TechnicalFeedbackResponse, error)
 }

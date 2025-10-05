@@ -277,3 +277,62 @@ func (h *InterviewHandler) validateHintRequest(input requests.HintRequest) error
 	return nil
 }
 
+// GenerateTechnicalFeedback handles POST /api/technical-feedback
+func (h *InterviewHandler) GenerateTechnicalFeedback(w http.ResponseWriter, r *http.Request) {
+	// Set CORS headers
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Content-Type", "application/json")
+
+	// Handle preflight requests
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	// Only allow POST requests
+	if r.Method != "POST" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse request body
+	var input requests.TechnicalFeedbackInput
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	// Validate input
+	if err := h.validateTechnicalFeedbackInput(input); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Generate technical feedback
+	response, err := h.interviewService.GenerateTechnicalFeedback(input)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Return success response
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
+}
+
+// validateTechnicalFeedbackInput validates the input data
+func (h *InterviewHandler) validateTechnicalFeedbackInput(input requests.TechnicalFeedbackInput) error {
+	if input.SessionID == "" {
+		return errors.New("sessionId is required")
+	}
+	if input.QuestionID == "" {
+		return errors.New("questionId is required")
+	}
+	if input.UserCode == "" {
+		return errors.New("userCode is required")
+	}
+	return nil
+}
+

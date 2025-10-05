@@ -251,3 +251,47 @@ func (s *InterviewService) GenerateHint(input requests.HintRequest) (*responses.
 
 	return hintResponse, nil
 }
+
+// GenerateTechnicalFeedback generates feedback for technical question performance
+func (s *InterviewService) GenerateTechnicalFeedback(input requests.TechnicalFeedbackInput) (*responses.TechnicalFeedbackResponse, error) {
+	// Validate session exists and get session info
+	session, err := s.interviewRepo.GetBySessionID(input.SessionID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get the technical question by ID
+	question, err := s.interviewRepo.GetTechnicalQuestionByID(input.QuestionID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create Gemini service and generate feedback
+	googleGeminiService := NewGoogleGeminiService()
+	
+	// Prepare question info for the prompt including job context
+	questionInfo := map[string]string{
+		"question":    question.Question.Question,
+		"description": question.Question.Description,
+		"difficulty":   string(question.Difficulty),
+		"jobTitle":    session.JobTitle,
+		"companyName": *session.CompanyName,
+	}
+
+	// Generate feedback using Gemini
+	feedbackResponse, err := googleGeminiService.GenerateTechnicalFeedback(
+		questionInfo,
+		input.UserCode,
+		input.HintsUsed,
+		input.IsCompleted,
+		input.TimeTaken,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Set the session ID in the response
+	feedbackResponse.SessionID = input.SessionID
+
+	return feedbackResponse, nil
+}

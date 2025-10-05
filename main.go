@@ -70,6 +70,7 @@ func main() {
 	http.HandleFunc("/api/technical-question", services.InterviewHandler.GetTechnicalQuestion)
 	http.HandleFunc("/api/hint", services.InterviewHandler.GenerateHint)
 	http.HandleFunc("/api/execute-code", services.InterviewHandler.ExecuteCode)
+	http.HandleFunc("/api/technical-feedback", services.InterviewHandler.GenerateTechnicalFeedback)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
 		fmt.Fprintf(w, `
@@ -411,6 +412,50 @@ func main() {
             </ul>
         </div>
 
+        <div class="endpoint">
+            <h2><span class="method post">POST</span><span class="url">/api/technical-feedback</span></h2>
+            <p><strong>Description:</strong> Generate AI-powered technical feedback based on candidate's performance, job context, and code quality</p>
+            <p><strong>Request:</strong></p>
+            <pre>curl -X POST http://localhost:8080/api/technical-feedback \\
+  -H "Content-Type: application/json" \\
+  -d '{...}'</pre>
+            <p><strong>Payload:</strong></p>
+            <div class="payload">
+                <pre>{
+  "sessionId": "ca781b1f-6d27-4a66-b6c1-ba597b76fee1",
+  "questionId": "68e205e6db8a0fc4ec6924ea",
+  "userCode": "def rottenOranges(grid):\n    if not grid or not grid[0]:\n        return -1\n    \n    m, n = len(grid), len(grid[0])\n    queue = []\n    fresh = 0\n    \n    for i in range(m):\n        for j in range(n):\n            if grid[i][j] == 2:\n                queue.append((i, j, 0))\n            elif grid[i][j] == 1:\n                fresh += 1\n    \n    if fresh == 0:\n        return 0\n    \n    return 1",
+  "hintsUsed": 2,
+  "isCompleted": false,
+  "timeTaken": 300
+}</pre>
+            </div>
+            <p><strong>Response:</strong></p>
+            <div class="response">
+                <pre>{
+  "sessionId": "ca781b1f-6d27-4a66-b6c1-ba597b76fee1",
+  "hireAbilityScore": 75,
+  "suggestions": [
+    "Consider implementing a BFS algorithm to solve this problem more efficiently",
+    "Add more comments to explain your logic and approach",
+    "Handle edge cases more thoroughly, especially for empty grids"
+  ],
+  "strengths": [
+    "Good understanding of the problem structure",
+    "Clean code organization and variable naming",
+    "Proper handling of the base case when no fresh oranges exist"
+  ]
+}</pre>
+            </div>
+            <p><strong>Features:</strong></p>
+            <ul>
+                <li><strong>Job Context Aware</strong> - Adjusts feedback based on job title and seniority level</li>
+                <li><strong>Performance Metrics</strong> - Considers hints used, completion status, and time taken</li>
+                <li><strong>AI-Powered Analysis</strong> - Uses Google Gemini for intelligent feedback generation</li>
+                <li><strong>Structured Response</strong> - Provides hireability score, suggestions, and strengths</li>
+            </ul>
+        </div>
+
 
         <div class="endpoint">
             <h2>Available Behavioral Topics</h2>
@@ -460,7 +505,8 @@ func main() {
 	fmt.Println("Technical Questions: http://localhost:8080/api/technical-question")
 	fmt.Println("Hint Generation: http://localhost:8080/api/hint")
 	fmt.Println("Code Execution: http://localhost:8080/api/execute-code")
-	fmt.Println("Powered by Google Gemini AI for intelligent question customization and hints!")
+	fmt.Println("Technical Feedback: http://localhost:8080/api/technical-feedback")
+	fmt.Println("Powered by Google Gemini AI for intelligent question customization, hints, and feedback!")
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
