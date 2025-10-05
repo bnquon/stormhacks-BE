@@ -321,33 +321,6 @@ func main() {
         </div>
 
         <div class="endpoint">
-            <h2><span class="method post">POST</span><span class="url">/api/hint</span></h2>
-            <p><strong>Description:</strong> Generate AI-powered hints for interview responses with text-to-speech support</p>
-            <p><strong>Request:</strong></p>
-            <pre>curl -X POST http://localhost:8080/api/hint \\
-  -H "Content-Type: application/json" \\
-  -d '{...}'</pre>
-            <p><strong>Payload:</strong></p>
-            <div class="payload">
-                <pre>{
-  "sessionId": "550e8400-e29b-41d4-a716-446655440000",
-  "questionId": "68e205dadb8a0fc4ec6924e9",
-  "previousHints": ["Think about dynamic programming", "Consider the recursive relationship"],
-  "userCode": "function lcs(str1, str2) {\n  // My current attempt\n  return '';\n}",
-  "userSpeech": "I'm trying to implement this function but I'm not sure where to start. Can you help me?"
-}</pre>
-            </div>
-            <p><strong>Response:</strong></p>
-            <div class="response">
-                <pre>{
-  "sessionId": "550e8400-e29b-41d4-a716-446655440000",
-  "conversationalHint": "Great start! I can see you're thinking about this problem. Let me guide you - consider what happens when you compare characters at each position. What would you do if the characters match versus when they don't match?",
-  "hintSummary": "Consider character comparison logic for matching vs non-matching cases"
-}</pre>
-            </div>
-        </div>
-
-        <div class="endpoint">
             <h2><span class="method post">POST</span><span class="url">/api/execute-code</span></h2>
             <p><strong>Description:</strong> Execute user-submitted code against test cases for technical questions</p>
             <p><strong>Request:</strong></p>
