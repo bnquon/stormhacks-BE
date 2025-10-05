@@ -1,92 +1,94 @@
-# Simple Go GraphQL Backend
+# AI-Powered Interview API
 
-A simple Go backend with GraphQL that provides a "hello world" endpoint with mock data.
+A comprehensive interview system with Google Gemini AI integration for question customization, code execution, and intelligent feedback generation.
+
+## Features
+
+- **AI-Powered Questions**: Customized interview questions based on job context and candidate profile
+- **Code Execution**: Execute and validate code submissions against test cases
+- **Intelligent Hints**: AI-generated hints for technical problems
+- **Technical Feedback**: Job-context aware feedback with hireability scoring
+- **Multi-Language Support**: Python, JavaScript, Java
+- **MongoDB Integration**: Persistent session and question storage
 
 ## Prerequisites
 
-You'll need to install Go first:
+- Go 1.19+
+- MongoDB (local or Atlas)
+- Google Gemini API key
 
-### Install Go on macOS:
-
-```bash
-# Using Homebrew (recommended)
-brew install go
-
-# Or download from https://golang.org/dl/
-```
-
-### Verify Installation:
-
-```bash
-go version
-```
-
-## Setup and Run
+## Setup
 
 1. **Install dependencies:**
-
-    ```bash
-    go mod tidy
-    ```
+   ```bash
+   go mod tidy
+   ```
 
 2. **Set up environment variables:**
-
-    ```bash
-    # Copy the example environment file
-    cp .env.example .env
-
-    # Edit .env with your MongoDB credentials
-    # The .env file contains your MongoDB Atlas connection string
-    ```
+   ```bash
+   # Create .env file with your credentials
+   MONGODB_URI=mongodb://localhost:27017/stormhacks
+   GEMINI_API_KEY=your_gemini_api_key_here
+   ```
 
 3. **Run the server:**
+   ```bash
+   go run main.go
+   ```
 
-    ```bash
-    go run main.go
-    ```
+4. **Access the API:**
+   - Web interface: http://localhost:8080
+   - Health check: http://localhost:8080/health
 
-4. **Access the server:**
-    - Web interface: http://localhost:8080
-    - GraphQL endpoint: http://localhost:8080/graphql
+## API Endpoints
 
-## Testing the GraphQL Endpoint
+- `POST /api/interview/session` - Create interview session
+- `GET /api/interview-questions` - Get AI-customized questions
+- `POST /api/interview/feedback` - Generate interview feedback
+- `GET /api/technical-question` - Get technical questions by difficulty
+- `POST /api/hint` - Generate AI hints
+- `POST /api/execute-code` - Execute and validate code
+- `POST /api/technical-feedback` - Generate technical feedback
 
-### Using curl:
+## Quick Start
 
-```bash
-curl -X POST http://localhost:8080/graphql \
-  -H "Content-Type: application/json" \
-  -d '{"query": "{ hello { message status count } }"}'
-```
+1. **Create a session:**
+   ```bash
+   curl -X POST http://localhost:8080/api/interview/session \
+     -H "Content-Type: application/json" \
+     -d '{"parsedResumeText": "...", "jobTitle": "Software Engineer", "jobInfo": "..."}'
+   ```
 
-### Expected Response:
+2. **Get questions:**
+   ```bash
+   curl "http://localhost:8080/api/interview-questions?sessionId=YOUR_SESSION_ID"
+   ```
 
-```json
-{
-    "data": {
-        "hello": {
-            "message": "Hello from GraphQL!",
-            "status": "success",
-            "count": 42
-        }
-    }
-}
-```
+3. **Execute code:**
+   ```bash
+   curl -X POST http://localhost:8080/api/execute-code \
+     -H "Content-Type: application/json" \
+     -d '{"questionId": "...", "code": "def solution(): ...", "language": "python"}'
+   ```
 
 ## Project Structure
 
 ```
 stormhacks-BE/
-├── go.mod          # Go module dependencies
-├── main.go         # Main server code
-└── README.md       # This file
+├── handlers/          # HTTP request handlers
+├── services/          # Business logic and AI integration
+├── repositories/      # Database operations
+├── models/           # Data structures
+├── types/            # Request/response types
+├── prompts/          # AI prompt templates
+├── database/         # MongoDB connection and migrations
+└── main.go           # Server entry point
 ```
 
-## Features
+## Technologies
 
--   ✅ Simple GraphQL schema with hello world endpoint
--   ✅ Mock data (no database required)
--   ✅ CORS enabled for web requests
--   ✅ Web interface for testing
--   ✅ Clean Go module structure
--   ✅ Runs on port 8080# stormhacks-BE
+- **Backend**: Go with HTTP handlers
+- **Database**: MongoDB with BSON
+- **AI**: Google Gemini API
+- **Code Execution**: go-piston library
+- **Architecture**: Clean layered architecture (handlers → services → repositories)
