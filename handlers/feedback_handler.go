@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"stormhacks-be/types/requests"
 )
@@ -67,8 +66,6 @@ func (h *FeedbackHandler) GenerateFeedback(w http.ResponseWriter, r *http.Reques
 
 // validateFeedbackInput validates the input data
 func (h *FeedbackHandler) validateFeedbackInput(input requests.InterviewFeedbackInput) error {
-	// Basic validation
-	fmt.Println("input", input)
 	if input.SessionID == "" {
 		return errors.New("sessionId is required")
 	}
