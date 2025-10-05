@@ -19,10 +19,11 @@ ORIGINAL QUESTIONS TO CUSTOMIZE:
 INSTRUCTIONS:
 1. IMPORTANT: Return exactly the same number of questions as provided in the input (do not add or remove questions)
 2. Keep the same behavioral topic for each question
-3. Make the questions more specific to the job role and company
-4. Reference relevant technologies, skills, or experiences from the resume when appropriate
+3. First Priority: Make the questions more specific to the job role and company
+4. Second Priority: Reference relevant technologies, skills, or experiences from the resume when appropriate (do it moderately, so like 1 question out of 3)
 5. Maintain the behavioral interview format (STAR method applicable)
-6. Keep questions professional and challenging but fair, but not too long, make it concise and to the point
+6. Keep questions professional and fair
+7. KEEP QUESTIONS CONCISE AND TO THE POINT, MAKE THEM SHORT AND TO THE POINT
 
 Please return the customized questions in this exact JSON format:
 {
