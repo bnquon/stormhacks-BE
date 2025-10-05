@@ -236,7 +236,7 @@ DO NOT include hireAbilityScore in any question object. It should only appear on
 }
 
 // parseGeminiResponse parses the JSON response from Gemini
-func (s *GoogleGeminiService) parseGeminiResponse(responseText string, sessionID int) (*responses.InterviewFeedbackResponse, error) {
+func (s *GoogleGeminiService) parseGeminiResponse(responseText string, sessionID string) (*responses.InterviewFeedbackResponse, error) {
 	// Clean the response text - remove markdown formatting
 	cleanedText := s.cleanJsonResponse(responseText)
 	

@@ -9,6 +9,8 @@ import (
 	"stormhacks-be/types/requests"
 	"stormhacks-be/types/responses"
 	"strconv"
+
+	"github.com/google/uuid"
 )
 
 // InterviewService handles interview business logic
@@ -23,14 +25,17 @@ func NewInterviewService(interviewRepo *repositories.InterviewRepository) *Inter
 	}
 }
 
-func (s *InterviewService) GetInterviewSession(sessionID int) (*models.InterviewSession, error) {
+func (s *InterviewService) GetInterviewSession(sessionID string) (*models.InterviewSession, error) {
 	return s.interviewRepo.GetBySessionID(sessionID)
 }
 
 // CreateInterviewSession creates a new interview session
 func (s *InterviewService) CreateInterviewSession(input requests.InterviewSessionInput) (*responses.InterviewSessionResponse, error) {
-	// Check if session already exists
-	existingSession, err := s.interviewRepo.GetBySessionID(input.SessionID)
+	// Generate a new UUID for the session
+	sessionID := uuid.New().String()
+
+	// Check if session already exists (very unlikely with UUID but good practice)
+	existingSession, err := s.interviewRepo.GetBySessionID(sessionID)
 	if err != nil && err.Error() != "not found" {
 		return nil, err
 	}
@@ -39,7 +44,7 @@ func (s *InterviewService) CreateInterviewSession(input requests.InterviewSessio
 	}
 	// Create interview session model
 	session := &models.InterviewSession{
-		SessionID:        input.SessionID,
+		SessionID:        sessionID,
 		ParsedResumeText: input.ParsedResumeText,
 		JobTitle:         input.JobTitle,
 		JobInfo:          input.JobInfo,
@@ -65,7 +70,7 @@ func (s *InterviewService) CreateInterviewSession(input requests.InterviewSessio
 }
 
 // GenerateInterviewQuestions generates interview questions based on the session
-func (s *InterviewService) GenerateInterviewQuestions(sessionID int) (*responses.InterviewSessionQuestionsResponse, error) {
+func (s *InterviewService) GenerateInterviewQuestions(sessionID string) (*responses.InterviewSessionQuestionsResponse, error) {
 	// Get the session first
 	session, err := s.interviewRepo.GetBySessionID(sessionID)
 	if err != nil {
@@ -104,7 +109,7 @@ func (s *InterviewService) GenerateInterviewQuestions(sessionID int) (*responses
 	}
 
 	return &responses.InterviewSessionQuestionsResponse{
-		SessionID: sessionID,
+		SessionID: session.SessionID,
 		Questions: responseQuestions,
 	}, nil
 }

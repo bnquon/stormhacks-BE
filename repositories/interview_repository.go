@@ -47,7 +47,7 @@ func (r *InterviewRepository) Create(session *models.InterviewSession) (*models.
 }
 
 // GetBySessionID retrieves an interview session by session ID
-func (r *InterviewRepository) GetBySessionID(sessionID int) (*models.InterviewSession, error) {
+func (r *InterviewRepository) GetBySessionID(sessionID string) (*models.InterviewSession, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 

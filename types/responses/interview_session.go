@@ -4,7 +4,7 @@ import "stormhacks-be/models"
 
 // InterviewSessionResponse represents the response for an interview session
 type InterviewSessionResponse struct {
-	SessionID int `json:"sessionId"`
+	SessionID string `json:"sessionId"`
 }
 
 // InterviewQuestion represents a single interview question
@@ -17,7 +17,7 @@ type InterviewQuestion struct {
 
 // InterviewSessionQuestionsResponse represents the response for generated questions
 type InterviewSessionQuestionsResponse struct {
-	SessionID int                  `json:"sessionId"`
+	SessionID string               `json:"sessionId"`
 	Questions []InterviewQuestion  `json:"questions"`
 }
 

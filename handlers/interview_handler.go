@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net/http"
 	"stormhacks-be/types/requests"
-	"strconv"
 )
 
 // InterviewHandler handles interview-related HTTP requests
@@ -92,12 +91,8 @@ func (h *InterviewHandler) GetInterviewQuestions(w http.ResponseWriter, r *http.
 		return
 	}
 
-	// Convert sessionId to int
-	sessionId, err := strconv.Atoi(sessionIdStr)
-	if err != nil {
-		http.Error(w, "sessionId must be a valid integer", http.StatusBadRequest)
-		return
-	}
+	// Use sessionId as string (UUID)
+	sessionId := sessionIdStr
 
 	// Get interview questions
 	response, err := h.interviewService.GenerateInterviewQuestions(sessionId)
@@ -113,10 +108,6 @@ func (h *InterviewHandler) GetInterviewQuestions(w http.ResponseWriter, r *http.
 
 // validateInterviewSessionInput validates the input data
 func (h *InterviewHandler) validateInterviewSessionInput(input requests.InterviewSessionInput) error {
-	// Basic validation - you can add more sophisticated validation here
-	if input.SessionID <= 0 {
-		return errors.New("sessionId must be greater than 0")
-	}
 	if input.ParsedResumeText == "" {
 		return errors.New("parsedResumeText is required")
 	}

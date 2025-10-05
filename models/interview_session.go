@@ -10,7 +10,7 @@ import (
 
 type InterviewSession struct {
 	ID                   primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	SessionID            int                `bson:"session_id" json:"sessionId"`
+	SessionID            string             `bson:"session_id" json:"sessionId"`
 	ParsedResumeText     string             `bson:"parsed_resume_text" json:"parsedResumeText"`
 	JobTitle             string             `bson:"job_title" json:"jobTitle"`
 	JobInfo              string             `bson:"job_info" json:"jobInfo"`
