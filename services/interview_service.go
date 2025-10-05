@@ -215,3 +215,24 @@ func (s *InterviewService) GetTechnicalQuestion(difficulty string) (*models.Tech
 func (s *InterviewService) ExecuteCode(input requests.ExecuteTechnicalInput) (*responses.ExecuteTechnicalResponse, error) {
 	return ExecuteCode(input, s.interviewRepo)
 }
+
+// GenerateHint generates hints for a user's response to an interview question
+func (s *InterviewService) GenerateHint(input requests.HintRequest) (*responses.HintResponse, error) {
+	// For now, just validate session exists but don't use session info
+	_, err := s.interviewRepo.GetBySessionID(input.SessionID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create Gemini service and generate hints
+	googleGeminiService := NewGoogleGeminiService()
+	hintResponse, err := googleGeminiService.GenerateHint(input.Question, input.UserCode, input.UserSpeech, input.PreviousHints)
+	if err != nil {
+		return nil, err
+	}
+
+	// Set the session ID in the response
+	hintResponse.SessionID = input.SessionID
+
+	return hintResponse, nil
+}

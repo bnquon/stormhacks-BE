@@ -253,6 +253,55 @@ func (s *GoogleGeminiService) parseGeminiResponse(responseText string, sessionID
 	return &feedbackResponse, nil
 }
 
+// GenerateHint generates hints for interview responses using Gemini
+func (s *GoogleGeminiService) GenerateHint(question string, userCode string, userSpeech string, previousHints []string) (*responses.HintResponse, error) {
+	ctx := context.Background()
+	
+	// Use prompts file
+	prompt := prompts.HintGenerationPrompt(question, userCode, userSpeech, previousHints)
+	
+	// Call Gemini API
+	result, err := s.client.Models.GenerateContent(
+		ctx,
+		"gemini-2.0-flash-exp",
+		genai.Text(prompt),
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate hints with Gemini: %w", err)
+	}
+	
+	// Parse the response
+	hintResponse, err := s.parseHintResponse(result.Text())
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse hint response: %w", err)
+	}
+	
+	return hintResponse, nil
+}
+
+// parseHintResponse parses the JSON response from Gemini for hints
+func (s *GoogleGeminiService) parseHintResponse(responseText string) (*responses.HintResponse, error) {
+	// Clean the response text
+	cleanedText := s.cleanJsonResponse(responseText)
+	
+	// Parse JSON response
+	var response struct {
+		ConversationalHint string `json:"conversationalHint"`
+		HintSummary       string `json:"hintSummary"`
+	}
+	
+	err := json.Unmarshal([]byte(cleanedText), &response)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal hint JSON response: %w. Response: %s", err, cleanedText)
+	}
+	
+	return &responses.HintResponse{
+		ConversationalHint: response.ConversationalHint,
+		HintSummary:       response.HintSummary,
+	}, nil
+}
+
 // cleanJsonResponse removes markdown formatting from JSON response
 func (s *GoogleGeminiService) cleanJsonResponse(responseText string) string {
 	// Remove markdown code blocks
