@@ -16,13 +16,15 @@ import (
 type InterviewRepository struct {
 	sessionsCollection     *mongo.Collection
 	questionsCollection    *mongo.Collection
+	technicalBankCollection *mongo.Collection
 }
 
 // NewInterviewRepository creates a new interview repository with all collections
 func NewInterviewRepository(db *mongo.Database) *InterviewRepository {
 	return &InterviewRepository{
-		sessionsCollection:  db.Collection("interview_sessions"),
-		questionsCollection: db.Collection("question_bank"),
+		sessionsCollection:     db.Collection("interview_sessions"),
+		questionsCollection:    db.Collection("question_bank"),
+		technicalBankCollection: db.Collection("technical_bank"),
 	}
 }
 
@@ -124,5 +126,33 @@ func (r *InterviewRepository) GetRandomQuestionsByTopics(topics []string) ([]mod
 
 	return selected, nil
 }
+
+// GetTechnicalQuestionByDifficulty retrieves a random technical question by difficulty level
+func (r *InterviewRepository) GetTechnicalQuestionByDifficulty(difficulty string) (*models.TechnicalBank, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Find all questions with the specified difficulty
+	cursor, err := r.technicalBankCollection.Find(ctx, bson.M{"difficulty": difficulty})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var questions []models.TechnicalBank
+	if err = cursor.All(ctx, &questions); err != nil {
+		return nil, err
+	}
+
+	if len(questions) == 0 {
+		return nil, errors.New("no technical questions found for the specified difficulty")
+	}
+
+	// Return a random question
+	rand.Seed(time.Now().UnixNano())
+	randomIndex := rand.Intn(len(questions))
+	return &questions[randomIndex], nil
+}
+
 
 
