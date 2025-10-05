@@ -211,6 +211,11 @@ func (s *InterviewService) GetTechnicalQuestion(difficulty string) (*models.Tech
 	return question, nil
 }
 
+// ExecuteCode executes submitted code and validates against test cases
+func (s *InterviewService) ExecuteCode(input requests.ExecuteTechnicalInput) (*responses.ExecuteTechnicalResponse, error) {
+	return ExecuteCode(input, s.interviewRepo)
+}
+
 // GenerateHint generates hints for a user's response to an interview question
 func (s *InterviewService) GenerateHint(input requests.HintRequest) (*responses.HintResponse, error) {
 	// For now, just validate session exists but don't use session info

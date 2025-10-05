@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"stormhacks-be/models"
 	"time"
+	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -152,6 +153,29 @@ func (r *InterviewRepository) GetTechnicalQuestionByDifficulty(difficulty string
 	rand.Seed(time.Now().UnixNano())
 	randomIndex := rand.Intn(len(questions))
 	return &questions[randomIndex], nil
+}
+
+// GetTechnicalQuestionByID retrieves a technical question by its ID
+func (r *InterviewRepository) GetTechnicalQuestionByID(questionID string) (*models.TechnicalBank, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Convert string ID to ObjectID
+	objectID, err := primitive.ObjectIDFromHex(questionID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid question ID format: %w", err)
+	}
+
+	var question models.TechnicalBank
+	err = r.technicalBankCollection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&question)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, errors.New("question not found")
+		}
+		return nil, err
+	}
+
+	return &question, nil
 }
 
 

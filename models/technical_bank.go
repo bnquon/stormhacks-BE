@@ -12,9 +12,10 @@ type TestCase struct {
 }
 
 type TechnicalQuestion struct {
-	Question    string     `bson:"question" json:"question"`
-	Description string     `bson:"description" json:"description"`
-	TestCases   []TestCase `bson:"testCases" json:"testCases"`
+	Question     string     `bson:"question" json:"question"`
+	Description  string     `bson:"description" json:"description"`
+	FunctionName string     `bson:"functionName" json:"functionName"`
+	TestCases    []TestCase `bson:"testCases" json:"testCases"`
 }
 
 type TechnicalBank struct {

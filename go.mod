@@ -20,6 +20,7 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/klauspost/compress v1.16.7 // indirect
+	github.com/milindmadhukar/go-piston v0.0.0-20240618154618-bbb46040f91d // indirect
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.2 // indirect
