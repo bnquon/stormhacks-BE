@@ -198,7 +198,7 @@ func categorizeAndFormatErrors(errors []string, outputs []string) string {
 	// Check for compilation errors (SyntaxError, etc.)
 	for _, err := range errors {
 		if strings.Contains(err, "SyntaxError") || strings.Contains(err, "IndentationError") || 
-		   strings.Contains(err, "NameError") || strings.Contains(err, "TypeError") {
+		  	strings.Contains(err, "NameError") || strings.Contains(err, "TypeError") {
 			return "Compilation Error: " + extractMainError(err)
 		}
 	}
@@ -206,8 +206,8 @@ func categorizeAndFormatErrors(errors []string, outputs []string) string {
 	// Check for runtime errors
 	for _, err := range errors {
 		if strings.Contains(err, "IndexError") || strings.Contains(err, "KeyError") || 
-		   strings.Contains(err, "AttributeError") || strings.Contains(err, "ValueError") ||
-		   strings.Contains(err, "RuntimeError") {
+			strings.Contains(err, "AttributeError") || strings.Contains(err, "ValueError") ||
+		  strings.Contains(err, "RuntimeError") {
 			return "Runtime Error: " + extractMainError(err)
 		}
 	}
@@ -215,7 +215,7 @@ func categorizeAndFormatErrors(errors []string, outputs []string) string {
 	// Check for timeout or memory errors
 	for _, err := range errors {
 		if strings.Contains(err, "timeout") || strings.Contains(err, "memory") || 
-		   strings.Contains(err, "killed") {
+		  strings.Contains(err, "killed") {
 			return "Execution Error: " + extractMainError(err)
 		}
 	}
