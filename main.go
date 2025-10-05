@@ -68,6 +68,7 @@ func main() {
 	http.HandleFunc("/api/interview-questions", services.InterviewHandler.GetInterviewQuestions)
 	http.HandleFunc("/api/interview/feedback", services.FeedbackHandler.GenerateFeedback)
 	http.HandleFunc("/api/technical-question", services.InterviewHandler.GetTechnicalQuestion)
+	http.HandleFunc("/api/hint", services.InterviewHandler.GenerateHint)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
 		fmt.Fprintf(w, `
@@ -285,6 +286,33 @@ func main() {
             </div>
         </div>
 
+        <div class="endpoint">
+            <h2><span class="method post">POST</span><span class="url">/api/hint</span></h2>
+            <p><strong>Description:</strong> Generate AI-powered hints for interview responses with text-to-speech support</p>
+            <p><strong>Request:</strong></p>
+            <pre>curl -X POST http://localhost:8080/api/hint \\
+  -H "Content-Type: application/json" \\
+  -d '{...}'</pre>
+            <p><strong>Payload:</strong></p>
+            <div class="payload">
+                <pre>{
+  "sessionId": "550e8400-e29b-41d4-a716-446655440000",
+  "question": "Implement a function to find the longest common subsequence between two strings",
+  "previousHints": ["Think about dynamic programming", "Consider the recursive relationship"],
+  "userCode": "function lcs(str1, str2) {\n  // My current attempt\n  return '';\n}",
+  "userSpeech": "I'm trying to implement this function but I'm not sure where to start. Can you help me?"
+}</pre>
+            </div>
+            <p><strong>Response:</strong></p>
+            <div class="response">
+                <pre>{
+  "sessionId": "550e8400-e29b-41d4-a716-446655440000",
+  "conversationalHint": "Great start! I can see you're thinking about this problem. Let me guide you - consider what happens when you compare characters at each position. What would you do if the characters match versus when they don't match?",
+  "hintSummary": "Consider character comparison logic for matching vs non-matching cases"
+}</pre>
+            </div>
+        </div>
+
 
         <div class="endpoint">
             <h2>Available Behavioral Topics</h2>
@@ -332,7 +360,8 @@ func main() {
 	fmt.Println("AI Questions: http://localhost:8080/api/interview-questions")
 	fmt.Println("AI Feedback: http://localhost:8080/api/interview/feedback")
 	fmt.Println("Technical Questions: http://localhost:8080/api/technical-question")
-	fmt.Println("Powered by Google Gemini AI for intelligent question customization!")
+	fmt.Println("Hint Generation: http://localhost:8080/api/hint")
+	fmt.Println("Powered by Google Gemini AI for intelligent question customization and hints!")
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

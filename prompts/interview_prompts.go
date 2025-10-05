@@ -1,5 +1,7 @@
 package prompts
 
+import "fmt"
+
 // QuestionCustomizationPrompt creates a prompt for customizing interview questions
 func QuestionCustomizationPrompt(sessionInfo map[string]string, questionsText string) string {
 	return `You are an expert interview coach. I need you to customize these behavioral interview questions to be more specific to the candidate's background and the job they're applying for.
@@ -97,6 +99,54 @@ Return your evaluation in this exact JSON format:
   ],
   "hireAbilityScore": number (0-100),
   "overallFeedback": ["feedback 1", "feedback 2", "feedback 3"]
+}
+
+Return ONLY the JSON, no other text.`
+}
+
+// HintGenerationPrompt creates a prompt for generating interview hints
+func HintGenerationPrompt(question string, userCode string, userSpeech string, previousHints []string) string {
+	// Build previous hints text
+	previousHintsText := ""
+	if len(previousHints) > 0 {
+		previousHintsText = "\n\nPREVIOUS HINTS GIVEN:\n"
+		for i, hint := range previousHints {
+			previousHintsText += fmt.Sprintf("%d. %s\n", i+1, hint)
+		}
+	}
+
+	return `You are an expert technical interviewer conducting a coding interview. Your task is to provide helpful hints to guide the candidate toward solving the problem.
+
+CURRENT INTERVIEW SITUATION:
+- Question: ` + question + `
+- What the candidate said: ` + userSpeech + `
+- Candidate's Current Code: ` + userCode + `"` + previousHintsText + `
+
+NOTE: Pay attention to both what the candidate said. If either contains phrases like "give me the solution", "show me the answer", "I need the full solution", "just tell me how to do it", or similar requests for the complete answer, they are asking for a solution.
+
+CRITICAL INSTRUCTIONS:
+- Act as an interviewer trying to guide the interviewee to the solution
+- NEVER provide the complete solution or full answer
+- Give progressive hints that lead them in the right direction
+- Focus on helping them think through the problem step by step
+- Be supportive and encouraging but don't give away the answer
+- IMPORTANT: If the user asks for a solution but has received fewer than 3 hints, calm them down and continue guiding them instead of providing the solution
+- Only provide about 90% of the solution (leaving some details for them to figure out) if they've already received 3 or more hints
+
+IMPORTANT RULES:
+- Do NOT repeat any of the previous hints already given
+- Count the number of previous hints provided
+- If user asks for solution but has fewer than 3 hints: Calm them down with encouraging words like "Don't worry, you're doing great!" and continue guiding them
+- If user asks for solution and has 3+ hints: Provide about 90% of the solution approach
+- Provide one conversational hint that an interviewer would say out loud
+- Provide one concise summary hint for display
+- Make hints specific and actionable
+- Guide them toward the next logical step in their solution
+
+Return your response in this exact JSON format:
+{
+  "conversationalHint": "A natural, conversational hint that an interviewer would say out loud to guide the candidate",
+  "hintSummary": "A concise summary hint for display purposes"
 }
 
 Return ONLY the JSON, no other text.`
