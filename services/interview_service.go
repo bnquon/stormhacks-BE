@@ -42,6 +42,13 @@ func (s *InterviewService) CreateInterviewSession(input requests.InterviewSessio
 	if existingSession != nil {
 		return nil, errors.New("session already exists")
 	}
+	// Convert TechnicalDifficulty enum to string
+	var technicalDifficultyStr *string
+	if input.TechnicalDifficulty != nil {
+		difficultyStr := string(*input.TechnicalDifficulty)
+		technicalDifficultyStr = &difficultyStr
+	}
+
 	// Create interview session model
 	session := &models.InterviewSession{
 		SessionID:        sessionID,
@@ -52,7 +59,7 @@ func (s *InterviewService) CreateInterviewSession(input requests.InterviewSessio
 		AdditionalInfo:     input.AdditionalInfo,
 		InterviewType:      input.TypeOfInterview,
 		BehaviouralTopics:  input.BehaviouralTopics,
-		TechnicalDifficulty: input.TechnicalDifficulty,
+		TechnicalDifficulty: technicalDifficultyStr,
 	}
 
 	// Save to database
@@ -178,4 +185,28 @@ func (s *InterviewService) GenerateInterviewFeedback(input requests.InterviewFee
 	}
 	
 	return feedbackResponse, nil
+}
+
+// GetTechnicalQuestion retrieves a random technical question by difficulty
+func (s *InterviewService) GetTechnicalQuestion(difficulty string) (*models.TechnicalBank, error) {
+	// Validate difficulty level
+	validDifficulties := []string{"Easy", "Medium", "Hard"}
+	isValid := false
+	for _, validDiff := range validDifficulties {
+		if difficulty == validDiff {
+			isValid = true
+			break
+		}
+	}
+	if !isValid {
+		return nil, errors.New("invalid difficulty level. Must be one of: Easy, Medium, Hard")
+	}
+
+	// Get technical question from repository
+	question, err := s.interviewRepo.GetTechnicalQuestionByDifficulty(difficulty)
+	if err != nil {
+		return nil, err
+	}
+
+	return question, nil
 }

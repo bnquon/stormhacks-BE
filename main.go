@@ -67,6 +67,7 @@ func main() {
 	http.HandleFunc("/api/interview/session", services.InterviewHandler.CreateInterviewSession)
 	http.HandleFunc("/api/interview-questions", services.InterviewHandler.GetInterviewQuestions)
 	http.HandleFunc("/api/interview/feedback", services.FeedbackHandler.GenerateFeedback)
+	http.HandleFunc("/api/technical-question", services.InterviewHandler.GetTechnicalQuestion)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
 		fmt.Fprintf(w, `
@@ -126,7 +127,7 @@ func main() {
   "additionalInfo": "Remote work, competitive benefits",
   "typeOfInterview": "behavioral",
   "behaviouralTopics": ["Leadership", "Problem Solving", "Adaptability"],
-  "technicalDifficulty": "intermediate"
+  "technicalDifficulty": "Medium"
 }</pre>
             </div>
             <p><strong>Response:</strong></p>
@@ -253,6 +254,39 @@ func main() {
         </div>
 
         <div class="endpoint">
+            <h2><span class="method get">GET</span><span class="url">/api/technical-question</span></h2>
+            <p><strong>Description:</strong> Get a random technical question by difficulty level</p>
+            <p><strong>Parameters:</strong></p>
+            <ul>
+                <li><code>difficulty</code> (required) - The difficulty level: Easy, Medium, or Hard</li>
+            </ul>
+            <p><strong>Request:</strong></p>
+            <pre>curl -X GET "http://localhost:8080/api/technical-question?difficulty=Medium"</pre>
+            <p><strong>Response:</strong></p>
+            <div class="response">
+                <pre>{
+  "id": "507f1f77bcf86cd799439011",
+  "difficulty": "Medium",
+  "question": {
+    "question": "Implement a function to find the longest common subsequence between two strings",
+    "description": "Given two strings, find the length of the longest common subsequence. A subsequence is a sequence that appears in the same relative order, but not necessarily contiguous.",
+    "testCases": [
+      {
+        "input": "ABCDGH, AEDFHR",
+        "expectedOutput": "3 (ADH)"
+      },
+      {
+        "input": "AGGTAB, GXTXAYB",
+        "expectedOutput": "4 (GTAB)"
+      }
+    ]
+  }
+}</pre>
+            </div>
+        </div>
+
+
+        <div class="endpoint">
             <h2>Available Behavioral Topics</h2>
             <ul>
                 <li>General</li>
@@ -279,9 +313,9 @@ func main() {
         <div class="endpoint">
             <h2>Technical Difficulty Levels</h2>
             <ul>
-                <li>beginner</li>
-                <li>intermediate</li>
-                <li>advanced</li>
+                <li>Easy</li>
+                <li>Medium</li>
+                <li>Hard</li>
             </ul>
         </div>
     </div>
@@ -297,6 +331,7 @@ func main() {
 	fmt.Println("Interview API: http://localhost:8080/api/interview/session")
 	fmt.Println("AI Questions: http://localhost:8080/api/interview-questions")
 	fmt.Println("AI Feedback: http://localhost:8080/api/interview/feedback")
+	fmt.Println("Technical Questions: http://localhost:8080/api/technical-question")
 	fmt.Println("Powered by Google Gemini AI for intelligent question customization!")
 
 	log.Fatal(http.ListenAndServe(":8080", nil))

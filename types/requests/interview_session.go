@@ -11,5 +11,5 @@ type InterviewSessionInput struct {
 	AdditionalInfo      *string                  `json:"additionalInfo,omitempty"`
 	TypeOfInterview     *string                  `json:"typeOfInterview,omitempty"` // Future implementation
 	BehaviouralTopics   []enums.BehaviouralTopic `json:"behaviouralTopics,omitempty"` // Default: ["General"]
-	TechnicalDifficulty *string                  `json:"technicalDifficulty,omitempty"` // Future implementation
+	TechnicalDifficulty *enums.TechnicalDifficulty `json:"technicalDifficulty,omitempty"` // Future implementation
 }
