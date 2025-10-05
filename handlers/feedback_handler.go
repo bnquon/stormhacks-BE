@@ -3,11 +3,10 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"net/http"
 	"fmt"
+	"net/http"
 	"stormhacks-be/types/requests"
 )
-
 
 // FeedbackHandler handles feedback-related HTTP requests
 type FeedbackHandler struct {
@@ -70,8 +69,8 @@ func (h *FeedbackHandler) GenerateFeedback(w http.ResponseWriter, r *http.Reques
 func (h *FeedbackHandler) validateFeedbackInput(input requests.InterviewFeedbackInput) error {
 	// Basic validation
 	fmt.Println("input", input)
-	if input.SessionID <= 0 {
-		return errors.New("sessionId must be greater than 0")
+	if input.SessionID == "" {
+		return errors.New("sessionId is required")
 	}
 	if len(input.InterviewQuestionsWithAnswers) == 0 {
 		return errors.New("interviewQuestionsWithAnswers cannot be empty")

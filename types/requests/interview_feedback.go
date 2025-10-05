@@ -6,6 +6,6 @@ type QuestionWithAnswer struct {
 }
 
 type InterviewFeedbackInput struct {
-	SessionID int `json:"sessionId" validate:"required"`
+	SessionID string `json:"sessionId" validate:"required"`
 	InterviewQuestionsWithAnswers []QuestionWithAnswer `json:"interviewQuestionsWithAnswers" validate:"required"`
 }

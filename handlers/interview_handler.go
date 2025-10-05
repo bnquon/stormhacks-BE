@@ -7,7 +7,6 @@ import (
 	"stormhacks-be/types/requests"
 )
 
-
 // InterviewHandler handles interview-related HTTP requests
 type InterviewHandler struct {
 	interviewService InterviewServiceInterface
@@ -65,12 +64,50 @@ func (h *InterviewHandler) CreateInterviewSession(w http.ResponseWriter, r *http
 	json.NewEncoder(w).Encode(response)
 }
 
+// GetInterviewQuestions handles GET /api/interview-questions
+func (h *InterviewHandler) GetInterviewQuestions(w http.ResponseWriter, r *http.Request) {
+	// Set CORS headers
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Content-Type", "application/json")
+
+	// Handle preflight requests
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	// Only allow GET requests
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Get sessionId from query parameters
+	sessionIdStr := r.URL.Query().Get("sessionId")
+	if sessionIdStr == "" {
+		http.Error(w, "sessionId query parameter is required", http.StatusBadRequest)
+		return
+	}
+
+	// Use sessionId as string (UUID)
+	sessionId := sessionIdStr
+
+	// Get interview questions
+	response, err := h.interviewService.GenerateInterviewQuestions(sessionId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Return success response
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
+}
+
 // validateInterviewSessionInput validates the input data
 func (h *InterviewHandler) validateInterviewSessionInput(input requests.InterviewSessionInput) error {
-	// Basic validation - you can add more sophisticated validation here
-	if input.SessionID <= 0 {
-		return errors.New("sessionId must be greater than 0")
-	}
 	if input.ParsedResumeText == "" {
 		return errors.New("parsedResumeText is required")
 	}

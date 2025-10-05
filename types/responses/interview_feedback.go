@@ -9,7 +9,7 @@ type QuestionWithFeedback struct {
 }
 
 type InterviewFeedbackResponse struct {
-	SessionID int `json:"sessionId"`
+	SessionID string `json:"sessionId"`
 	InterviewQuestionFeedback []QuestionWithFeedback `json:"interviewQuestionFeedback"`
 	HireAbilityScore int `json:"hireAbilityScore"` // 0-100
 }
